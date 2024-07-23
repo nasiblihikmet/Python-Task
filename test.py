@@ -23,6 +23,17 @@
 #     print(response.text)
 
 
-from web3 import Web3, EthereumTesterProvider
-w3 = Web3(EthereumTesterProvider())
-print(w3.is_connected())
+# from web3 import Web3, EthereumTesterProvider
+# w3 = Web3(EthereumTesterProvider())
+# print(w3.is_connected())
+
+
+from web3 import Web3, HTTPProvider
+          
+def test_block_number():
+    url = "https://scroll.drpc.org"  # url string
+    
+    web3 = Web3(HTTPProvider(url))
+    print(web3.eth.block_number)
+
+test_block_number()

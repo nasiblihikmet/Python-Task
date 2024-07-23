@@ -6,7 +6,7 @@ from web3 import Web3
 # provider_url = "https://api.scrollscan.com/api/l2/transactions?apikey=PHBN1IF93VFJG8TYWHSPDNQZI6Z7QEMTFY"
 
 # Connect to Scroll Layer 2 network
-provider_url = "scrolscan link + PHBN1IF93VFJG8TYWHSPDNQZI6Z7QEMTFY"
+provider_url = "https://scroll.drpc.org"
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
 # # Check if the connection is successful
@@ -22,7 +22,7 @@ contract_abi = '''
 '''
 # Skydrome Contract address
 contract_address = web3.to_checksum_address("0x03290a52ba3164639067622e20b90857eaded299")
-
+print(contract_address)
 contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 
