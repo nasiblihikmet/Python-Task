@@ -6,7 +6,8 @@ from web3 import Web3
 # provider_url = "https://api.scrollscan.com/api/l2/transactions?apikey=PHBN1IF93VFJG8TYWHSPDNQZI6Z7QEMTFY"
 
 # Connect to Scroll Layer 2 network
-provider_url = "https://scroll.drpc.org"
+# https://scroll.drpc.org
+provider_url = "https://lb.drpc.org/ogrpc?network=ethereum&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
 # # Check if the connection is successful
