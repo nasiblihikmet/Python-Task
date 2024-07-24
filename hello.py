@@ -7,9 +7,10 @@ from web3 import Web3
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
-provider_url = "https://lb.drpc.org/ogrpc?network=ethereum&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
+provider_url = "https://lb.drpc.org/ogrpc?network=scroll&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
+ 
 # # Check if the connection is successful
 # if web3.is_connected():
 #     print("Connected to Scroll Layer 2 network")
@@ -37,13 +38,13 @@ def get_events(event_name, from_block, to_block):
 now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
 thirty_days_ago = now - datetime.timedelta(days=30)
-
+print (654)
 # Convert timestamps to block numbers
 def get_block_number(timestamp):
     return web3.eth.get_block(timestamp)['number']
 
 
-current_block = web3.eth.get_block('latest')['number']
+current_block = web3.eth.get_block_number()
 yesterday_block = get_block_number(yesterday.timestamp())
 thirty_days_ago_block = get_block_number(thirty_days_ago.timestamp())
 
