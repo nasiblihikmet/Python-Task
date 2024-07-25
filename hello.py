@@ -40,7 +40,7 @@ yesterday = now - datetime.timedelta(days=1)
 thirty_days_ago = now - datetime.timedelta(days=30)
 print (654)
 # Convert timestamps to block numbers
-def get_block_number(web3,timestamp):
+def get_block_number(timestamp):
     return web3.eth.get_block(timestamp)['number']
 
 
