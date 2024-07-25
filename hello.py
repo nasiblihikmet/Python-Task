@@ -31,7 +31,7 @@ contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 # Function to get events from the contract
 def get_events(event_name, from_block, to_block):
-    event_filter = contract.events[event_name].createFilter(fromBlock=from_block, toBlock=to_block)
+    event_filter = contract.events.Transfer.createFilter(fromBlock=from_block, toBlock=to_block)
     return event_filter.get_all_entries()
 
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -73,12 +73,13 @@ yesterday_block = get_block_number(yesterday_timestamp)
 # thirty_days_ago_block = get_block_number(thirty_days_ago.timestamp())
 thirty_days_ago_timestamp = int(thirty_days_ago.timestamp())
 thirty_days_ago_block = get_block_number(thirty_days_ago_timestamp)
+
 print(999)
 
-
 # Get trading events
-trades_last_24_hours = get_events('Trade', yesterday_block, current_block)
-trades_last_30_days = get_events('Trade', thirty_days_ago_block, current_block)
+trades_last_24_hours = get_events('Approval', yesterday_block, current_block)
+trades_last_30_days = get_events('Approval', thirty_days_ago_block, current_block)
+
 # Initialize data storage
 addresses_traded_24h = set()
 addresses_bought_24h = set()
