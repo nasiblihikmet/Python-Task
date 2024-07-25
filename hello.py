@@ -3,6 +3,7 @@ import csv
 import datetime
 import pandas as pd
 from web3 import Web3
+from web3.middleware import geth_poa_middleware
 
 
 # Connect to Scroll Layer 2 network
@@ -33,27 +34,51 @@ def get_events(event_name, from_block, to_block):
     event_filter = contract.events[event_name].createFilter(fromBlock=from_block, toBlock=to_block)
     return event_filter.get_all_entries()
 
+web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
 # Calculate the timestamp for 24 hours ago and 30 days ago
 now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
 thirty_days_ago = now - datetime.timedelta(days=30)
-print (654)
+
+def get_block_by_timestamp(web3, timestamp):
+    latest_block = web3.eth.get_block_number()
+                   
+    earliest_block = 0
+
+    while earliest_block <= latest_block:
+        mid_block = (earliest_block + latest_block) // 2
+        block = web3.eth.get_block(mid_block)
+        
+        if block['timestamp'] < timestamp:
+            earliest_block = mid_block + 1
+        elif block['timestamp'] > timestamp:
+            latest_block = mid_block - 1
+        else:
+            return block
+        
+    return web3.eth.get_block(earliest_block)
+
+             
+
 # Convert timestamps to block numbers
 def get_block_number(timestamp):
-    return web3.eth.get_block(timestamp)['number']
+    # return web3.eth.get_block(timestamp)['number']
+    block = get_block_by_timestamp(web3, timestamp)
+    return block['number']
 
+current_block =  web3.eth.get_block_number()
+yesterday_timestamp = int(yesterday.timestamp())
+yesterday_block = get_block_number(yesterday_timestamp)
+# thirty_days_ago_block = get_block_number(thirty_days_ago.timestamp())
+thirty_days_ago_timestamp = int(thirty_days_ago.timestamp())
+thirty_days_ago_block = get_block_number(thirty_days_ago_timestamp)
+print(999)
 
-current_block = web3.eth.get_block_number()
-
-yesterday_block = get_block_number(yesterday.timestamp())
-
-thirty_days_ago_block = get_block_number(thirty_days_ago.timestamp())
 
 # Get trading events
 trades_last_24_hours = get_events('Trade', yesterday_block, current_block)
 trades_last_30_days = get_events('Trade', thirty_days_ago_block, current_block)
-
 # Initialize data storage
 addresses_traded_24h = set()
 addresses_bought_24h = set()
