@@ -3,7 +3,7 @@ import csv
 import datetime
 import pandas as pd
 from web3 import Web3
-# provider_url = "https://api.scrollscan.com/api/l2/transactions?apikey=PHBN1IF93VFJG8TYWHSPDNQZI6Z7QEMTFY"
+
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
@@ -40,12 +40,14 @@ yesterday = now - datetime.timedelta(days=1)
 thirty_days_ago = now - datetime.timedelta(days=30)
 print (654)
 # Convert timestamps to block numbers
-def get_block_number(timestamp):
+def get_block_number(web3,timestamp):
     return web3.eth.get_block(timestamp)['number']
 
 
 current_block = web3.eth.get_block_number()
+
 yesterday_block = get_block_number(yesterday.timestamp())
+
 thirty_days_ago_block = get_block_number(thirty_days_ago.timestamp())
 
 # Get trading events
