@@ -9,6 +9,8 @@ from web3.middleware import geth_poa_middleware
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
+
+provider_url = ""
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
  
@@ -29,10 +31,25 @@ print(contract_address)
 contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 
+def find_transactions(contract_address, start_block, end_block):
+    # Ensure the address is in checksum format
+    transactions = []
+    for block_number in range(start_block, end_block + 1):
+        print(f"Checking block {block_number}")
+        block = web3.eth.get_block(block_number, full_transactions=True)
+
+        for tx in block.transactions:
+            if tx['from'] == contract_address or tx['to'] == contract_address:
+                transactions.append(tx)
+
+    return transactions
+
+
 # Function to get events from the contract
 def get_events(event_name, from_block, to_block):
     event_filter = contract.events.Transfer.createFilter(fromBlock=from_block, toBlock=to_block)
     return event_filter.get_all_entries()
+
 
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
@@ -77,8 +94,11 @@ thirty_days_ago_block = get_block_number(thirty_days_ago_timestamp)
 print(999)
 
 # Get trading events
-trades_last_24_hours = get_events('Approval', yesterday_block, current_block)
-trades_last_30_days = get_events('Approval', thirty_days_ago_block, current_block)
+transactions = find_transactions(contract_address, yesterday_block, current_block)
+
+
+
+"""
 
 # Initialize data storage
 addresses_traded_24h = set()
@@ -107,6 +127,5 @@ with open('skydrome_trading_data.csv', mode='w') as file:
     writer.writerow(['Total SKY Trading Volume in 24 hours in USD', volume_24h_usd])
     writer.writerow(['Total SKY Trading Volume in 30 days in USD', volume_30d_usd])
     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(addresses_bought_24h))
-    writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))
-
-print("Data has been saved to skydrome_trading_data.csv")
+    writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))\
+"""
