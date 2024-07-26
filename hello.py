@@ -1,4 +1,5 @@
 
+
 import csv
 import datetime
 import pandas as pd
@@ -8,7 +9,6 @@ from web3.middleware import geth_poa_middleware
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
-provider_url = "https://lb.drpc.org/ogrpc?network=scroll&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
  
