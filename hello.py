@@ -5,12 +5,12 @@ import datetime
 import pandas as pd
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-
+# import requests
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
 
-provider_url = ""
+provider_url = "https://lb.drpc.org/ogrpc?network=scroll&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
  
@@ -59,8 +59,7 @@ yesterday = now - datetime.timedelta(days=1)
 thirty_days_ago = now - datetime.timedelta(days=30)
 
 def get_block_by_timestamp(web3, timestamp):
-    latest_block = web3.eth.get_block_number()
-                   
+    latest_block = web3.eth.get_block_number()              
     earliest_block = 0
 
     while earliest_block <= latest_block:
@@ -93,9 +92,27 @@ thirty_days_ago_block = get_block_number(thirty_days_ago_timestamp)
 
 print(999)
 
+address= set()
+amount = 0
 # Get trading events
-transactions = find_transactions(contract_address, yesterday_block, current_block)
+transactions = find_transactions(contract_address, current_block-3 , current_block)
+for transaction in transactions:
+    # address.add(transaction.seller_address)
+    address.add(transaction['args']['seller_address'])
+    # address.add(transaction.to)
+    address.add(transaction['args']['to'])
+    # amount += transaction.amount
+    amount += transaction['args']['amount']
 
+    # Number of unique addresses
+unique_address_count = len(address)
+print(f"Number of addresses that traded SKY in the last 24 hours: {unique_address_count}")
+total_trading_volume_eth = web3.eth.fromWei(amount, 'ether')
+
+print(f"Total SKY Trading Volume in 24 hours: {total_trading_volume_eth} ETH")
+
+print(len(address)) # Number of addresses that traded SKY in the last 24 hours
+print(amount) # Total SKY Trading Volume in 24 hours in ETH >> convert USD
 
 
 """
