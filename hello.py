@@ -34,7 +34,8 @@ contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 def find_transactions(contract_address, start_block, end_block):
     # Ensure the address is in checksum format
     transactions = []
-    for block_number in range(start_block, end_block + 1):
+    # for block_number in range(start_block, end_block + 1):
+    for block_number in (7879412, 7878343):
         print(f"Checking block {block_number}")
         block = web3.eth.get_block(block_number, full_transactions=True)
 
@@ -95,20 +96,22 @@ print(999)
 address= set()
 amount = 0
 # Get trading events
-transactions = find_transactions(contract_address, current_block-3 , current_block)
+transactions = find_transactions(contract_address, current_block-230, current_block)
+print(transactions)
 for transaction in transactions:
     # address.add(transaction.seller_address)
-    address.add(transaction['args']['seller_address'])
+    address.add(transaction["from"])
     # address.add(transaction.to)
-    address.add(transaction['args']['to'])
+    address.add(transaction['to'])
     # amount += transaction.amount
-    amount += transaction['args']['amount']
-
-    # Number of unique addresses
+    amount += transaction['value']
+    if len(address) > 2:
+        pass
+        # Number of unique addresses
 unique_address_count = len(address)
 print(f"Number of addresses that traded SKY in the last 24 hours: {unique_address_count}")
-total_trading_volume_eth = web3.eth.fromWei(amount, 'ether')
 
+total_trading_volume_eth = web3.from_wei(amount, 'ether')
 print(f"Total SKY Trading Volume in 24 hours: {total_trading_volume_eth} ETH")
 
 print(len(address)) # Number of addresses that traded SKY in the last 24 hours
