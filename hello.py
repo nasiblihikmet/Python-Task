@@ -5,7 +5,8 @@ import datetime
 import pandas as pd
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-# import requests
+import requests
+from decimal import Decimal
 
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
@@ -95,6 +96,7 @@ print(999)
 
 address= set()
 amount = 0
+amount_30d = 0
 # Get trading events
 transactions = find_transactions(contract_address, current_block-230, current_block)
 print(transactions)
@@ -107,6 +109,12 @@ for transaction in transactions:
     amount += transaction['value']
     if len(address) > 2:
         pass
+
+    # Get trading events for the last 30 days
+transactions_30d = find_transactions(contract_address, thirty_days_ago_block, current_block)
+for transaction in transactions_30d:
+    amount_30d += transaction['value']
+
         # Number of unique addresses
 unique_address_count = len(address)
 print(f"Number of addresses that traded SKY in the last 24 hours: {unique_address_count}")
@@ -116,6 +124,26 @@ print(f"Total SKY Trading Volume in 24 hours: {total_trading_volume_eth} ETH")
 
 print(len(address)) # Number of addresses that traded SKY in the last 24 hours
 print(amount) # Total SKY Trading Volume in 24 hours in ETH >> convert USD
+
+total_trading_volume_eth_30d = web3.from_wei(amount_30d, 'ether')
+print(f"Total SKY Trading Volume in 30 days: {total_trading_volume_eth_30d} ETH")
+
+def get_eth_price():
+    response = requests.get('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
+    data = response.json()
+    eth_usd_rate = float(data['data']['rates']['USD'])
+    return eth_usd_rate
+
+eth_usd_rate = get_eth_price()
+total_trading_volume_eth = Decimal(total_trading_volume_eth)
+total_trading_volume_eth_30d = Decimal(total_trading_volume_eth_30d)
+eth_usd_rate_decimal = Decimal(eth_usd_rate)
+
+total_trading_volume_usd = total_trading_volume_eth * eth_usd_rate_decimal
+print(f"Total SKY Trading Volume in 24 hours in USD: ${total_trading_volume_usd:.2f} USD") # Total SKY Trading Volume in 24 hours in USD
+
+total_trading_volume_usd_30d = total_trading_volume_eth_30d * eth_usd_rate_decimal
+print(f"Total SKY Trading Volume in 30 days in USD: ${total_trading_volume_usd_30d:.2f} USD")#Total SKY Trading Volume in 30 days in USD
 
 
 """
@@ -147,5 +175,5 @@ with open('skydrome_trading_data.csv', mode='w') as file:
     writer.writerow(['Total SKY Trading Volume in 24 hours in USD', volume_24h_usd])
     writer.writerow(['Total SKY Trading Volume in 30 days in USD', volume_30d_usd])
     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(addresses_bought_24h))
-    writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))\
+    writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))
 """
