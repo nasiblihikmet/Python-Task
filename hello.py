@@ -11,7 +11,7 @@ from decimal import Decimal
 # Connect to Scroll Layer 2 network
 # https://scroll.drpc.org
 
-provider_url = "https://lb.drpc.org/ogrpc?network=scroll&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
+provider_url = ""
 web3 = Web3(Web3.HTTPProvider(provider_url))
 
  
@@ -107,8 +107,6 @@ for transaction in transactions:
     address.add(transaction['to'])
     # amount += transaction.amount
     amount += transaction['value']
-    if len(address) > 2:
-        pass
 
     # Get trading events for the last 30 days
 transactions_30d = find_transactions(contract_address, thirty_days_ago_block, current_block)
@@ -146,7 +144,6 @@ total_trading_volume_usd_30d = total_trading_volume_eth_30d * eth_usd_rate_decim
 print(f"Total SKY Trading Volume in 30 days in USD: ${total_trading_volume_usd_30d:.2f} USD")#Total SKY Trading Volume in 30 days in USD
 
 
-"""
 
 # Initialize data storage
 addresses_traded_24h = set()
@@ -155,18 +152,18 @@ addresses_sold_24h = set()
 volume_24h_usd = 0
 volume_30d_usd = 0
 
-# Process trades from the last 24 hours
-for trade in trades_last_24_hours:
-    addresses_traded_24h.add(trade['args']['trader'])
-    if trade['args']['type'] == 'buy':
-        addresses_bought_24h.add(trade['args']['trader'])
-    elif trade['args']['type'] == 'sell':
-        addresses_sold_24h.add(trade['args']['trader'])
-    volume_24h_usd += trade['args']['volumeUSD']
+# # Process trades from the last 24 hours
+# for trade in trades_last_24_hours:
+#     addresses_traded_24h.add(trade['args']['trader'])
+#     if trade['args']['type'] == 'buy':
+#         addresses_bought_24h.add(trade['args']['trader'])
+#     elif trade['args']['type'] == 'sell':
+#         addresses_sold_24h.add(trade['args']['trader'])
+#     volume_24h_usd += trade['args']['volumeUSD']
 
-# Process trades from the last 30 days
-for trade in trades_last_30_days:
-    volume_30d_usd += trade['args']['volumeUSD']
+# # Process trades from the last 30 days
+# for trade in trades_last_30_days:
+#     volume_30d_usd += trade['args']['volumeUSD']
 
 # Save data to CSV
 with open('skydrome_trading_data.csv', mode='w') as file:
@@ -176,4 +173,3 @@ with open('skydrome_trading_data.csv', mode='w') as file:
     writer.writerow(['Total SKY Trading Volume in 30 days in USD', volume_30d_usd])
     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(addresses_bought_24h))
     writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))
-"""
