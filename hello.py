@@ -1,5 +1,3 @@
-
-
 import csv
 import datetime
 import pandas as pd
@@ -35,8 +33,8 @@ contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 def find_transactions(contract_address, start_block, end_block):
     # Ensure the address is in checksum format
     transactions = []
-    # for block_number in range(start_block, end_block + 1):
-    for block_number in (7879412, 7878343):
+    for block_number in range(start_block, end_block + 1):
+    
         print(f"Checking block {block_number}")
         block = web3.eth.get_block(block_number, full_transactions=True)
 
@@ -92,13 +90,15 @@ yesterday_block = get_block_number(yesterday_timestamp)
 thirty_days_ago_timestamp = int(thirty_days_ago.timestamp())
 thirty_days_ago_block = get_block_number(thirty_days_ago_timestamp)
 
-print(999)
+
 
 address= set()
 amount = 0
 amount_30d = 0
+buyers_24h = set()
+sellers_24h = set()
 # Get trading events
-transactions = find_transactions(contract_address, current_block-230, current_block)
+transactions = find_transactions(contract_address, yesterday_block, current_block)
 print(transactions)
 for transaction in transactions:
     # address.add(transaction.seller_address)
@@ -108,8 +108,12 @@ for transaction in transactions:
     # amount += transaction.amount
     amount += transaction['value']
 
+    buyers_24h.add(transaction['to'])
+    sellers_24h.add(transaction['from'])
+   
+
     # Get trading events for the last 30 days
-transactions_30d = find_transactions(contract_address, thirty_days_ago_block, current_block)
+transactions_30d = find_transactions(contract_address, current_block-3, current_block)
 for transaction in transactions_30d:
     amount_30d += transaction['value']
 
@@ -143,14 +147,31 @@ print(f"Total SKY Trading Volume in 24 hours in USD: ${total_trading_volume_usd:
 total_trading_volume_usd_30d = total_trading_volume_eth_30d * eth_usd_rate_decimal
 print(f"Total SKY Trading Volume in 30 days in USD: ${total_trading_volume_usd_30d:.2f} USD")#Total SKY Trading Volume in 30 days in USD
 
+print("List of addresses that bought SKY in the last 24 hours:")
+print(list(buyers_24h))
+
+print("List of addresses that sold SKY in the last 24 hours:")
+print(list(sellers_24h))
 
 
-# Initialize data storage
-addresses_traded_24h = set()
-addresses_bought_24h = set()
-addresses_sold_24h = set()
-volume_24h_usd = 0
-volume_30d_usd = 0
+
+# # Save data to CSV
+# with open('skydrome_trading_data.csv', mode='w') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(['Number of addresses that traded SKY in the last 24 hours', len(unique_address_count)])
+#     writer.writerow(['Total SKY Trading Volume in 24 hours in USD', total_trading_volume_usd])
+#     writer.writerow(['Total SKY Trading Volume in 30 days in USD', total_trading_volume_usd_30d])
+#     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(buyers_24h))
+#     writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(sellers_24h))
+
+
+
+    # Initialize data storage
+# addresses_traded_24h = set()
+# addresses_bought_24h = set()
+# addresses_sold_24h = set()
+# volume_24h_usd = 0
+# volume_30d_usd = 0
 
 # # Process trades from the last 24 hours
 # for trade in trades_last_24_hours:
@@ -164,12 +185,3 @@ volume_30d_usd = 0
 # # Process trades from the last 30 days
 # for trade in trades_last_30_days:
 #     volume_30d_usd += trade['args']['volumeUSD']
-
-# Save data to CSV
-with open('skydrome_trading_data.csv', mode='w') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Number of addresses that traded SKY in the last 24 hours', len(addresses_traded_24h)])
-    writer.writerow(['Total SKY Trading Volume in 24 hours in USD', volume_24h_usd])
-    writer.writerow(['Total SKY Trading Volume in 30 days in USD', volume_30d_usd])
-    writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(addresses_bought_24h))
-    writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(addresses_sold_24h))
