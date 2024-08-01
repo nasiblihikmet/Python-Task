@@ -1,6 +1,6 @@
 import csv
 import datetime 
-from datetime import timezone
+from datetime import timezone, timedelta
 import asyncio
 from web3 import Web3, AsyncHTTPProvider, HTTPProvider
 import pandas as pd
@@ -72,11 +72,6 @@ def get_block_number(timestamp):
     block = get_block_by_timestamp(web3, timestamp)
     return block['number']
 
-# # Get the current UTC date and time
-# current_utc_datetime = datetime.now(tz=timezone.utc)
-# # Convert timestamp to datetime in UTC
-# utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
-
 # Calculate the timestamp for 24 hours ago and 30 days ago
 now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
@@ -104,8 +99,10 @@ async def main():
            # Extract and format data according to the new headers
         block_hash = Web3.to_hex(transaction.get('blockHash', b''))
         block_number = transaction.get('blockNumber', 'N/A')
+        timestamp = transaction.get('timestamp', 0)
+        utc_datetime = datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=timezone.utc)
         from_address = Web3.to_checksum_address(transaction.get('from', 'N/A'))
-        timestamp = transaction.get('timestamp', 'N/A') 
+        to_address = Web3.to_checksum_address(transaction.get('to', 'N/A'))
         gas = transaction.get('gas', 'N/A')
         gas_price = transaction.get('gasPrice', 'N/A')
         max_fee_per_gas = transaction.get('maxFeePerGas', 'N/A')
@@ -113,7 +110,6 @@ async def main():
         tx_hash = Web3.to_hex(transaction.get('hash', b''))
         input_data = Web3.to_hex(transaction.get('input', b''))
         nonce = transaction.get('nonce', 'N/A')
-        to_address = Web3.to_checksum_address(transaction.get('to', 'N/A'))
         transaction_index = transaction.get('transactionIndex', 'N/A')
         value = Web3.from_wei(transaction.get('value', 0), 'ether')
         tx_type = transaction.get('type', 'N/A')
@@ -126,8 +122,10 @@ async def main():
         transactions_arr.append([
             block_hash,
             block_number,
-            from_address,
             timestamp,
+            utc_datetime.isoformat(),
+            from_address,
+            to_address,
             gas,
             gas_price,
             max_fee_per_gas,
@@ -135,7 +133,6 @@ async def main():
             tx_hash,
             input_data,
             nonce,
-            to_address,
             transaction_index,
             value,
             tx_type,
@@ -164,19 +161,17 @@ async def main():
         writer.writerow(list(buyers_24h))
         writer.writerow(['Addresses that sold SKY in the last 24 hours'])
         writer.writerow(list(sellers_24h))
-        # writer.writerow(['Addresses Transcations'])
-        # writer.writerow(transactions_arr)
-
-  # Write transactions data
-       
         writer.writerow([
-            'Block Hash', 'Block Number', 'From', 'timestamp', 'Gas', 'Gas Price', 'Max Fee Per Gas',
-            'Max Priority Fee Per Gas', 'Hash', 'Input', 'Nonce', 'To', 'Transaction Index',
+            'Block Hash', 'Block Number',  'timestamp', 'DateTime (UTC)', 'From', 'To', 'Gas', 'Gas Price', 'Max Fee Per Gas',
+            'Max Priority Fee Per Gas', 'Hash', 'Input', 'Nonce', 'Transaction Index',
             'Value', 'Type', 'Access List', 'Chain ID', 'V', 'R', 'S'
         ])
         
         for tx in transactions_arr:
             writer.writerow(tx)
+if __name__ == "__main__":
+    asyncio.run(main())
+
 
         # writer.writerow(['Transactions (from, to, value, hash)'])
         # for tx in transaction_set:
@@ -187,13 +182,6 @@ async def main():
         #     'Value', 'Type', 'Access List', 'Chain ID', 'V', 'R', 'S'])
         # for transaction_tuple in transaction_set:
         #  writer.writerow(list(transaction_tuple))
-        
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
-
 
 
     # # Save data to CSV
