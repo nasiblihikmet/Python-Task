@@ -1,5 +1,6 @@
 import csv
-import datetime
+import datetime 
+from datetime import timezone
 import asyncio
 from web3 import Web3, AsyncHTTPProvider, HTTPProvider
 import pandas as pd
@@ -37,6 +38,8 @@ async def find_transactions(web3, contract_address, start_block, end_block):
             block = web3.eth.get_block(block_number, full_transactions=True)
             for tx in block['transactions']:
                 if tx['from'] == contract_address or tx['to'] == contract_address:
+                    tx= dict(tx)
+                    tx['timestamp'] = block['timestamp']
                     transactions.append(tx)
         except BlockNotFound:
             print(f"Block {block_number} not found")
@@ -69,13 +72,18 @@ def get_block_number(timestamp):
     block = get_block_by_timestamp(web3, timestamp)
     return block['number']
 
+# # Get the current UTC date and time
+# current_utc_datetime = datetime.now(tz=timezone.utc)
+# # Convert timestamp to datetime in UTC
+# utc_datetime = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+
 # Calculate the timestamp for 24 hours ago and 30 days ago
 now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
 
 async def main():
-    start_block = 7938715
-    end_block = 7938728
+    start_block = 7964494
+    end_block = 7964502
     
     transactions_arr = []
     address= set()
@@ -97,6 +105,7 @@ async def main():
         block_hash = Web3.to_hex(transaction.get('blockHash', b''))
         block_number = transaction.get('blockNumber', 'N/A')
         from_address = Web3.to_checksum_address(transaction.get('from', 'N/A'))
+        timestamp = transaction.get('timestamp', 'N/A') 
         gas = transaction.get('gas', 'N/A')
         gas_price = transaction.get('gasPrice', 'N/A')
         max_fee_per_gas = transaction.get('maxFeePerGas', 'N/A')
@@ -118,6 +127,7 @@ async def main():
             block_hash,
             block_number,
             from_address,
+            timestamp,
             gas,
             gas_price,
             max_fee_per_gas,
@@ -160,7 +170,7 @@ async def main():
   # Write transactions data
        
         writer.writerow([
-            'Block Hash', 'Block Number', 'From', 'Gas', 'Gas Price', 'Max Fee Per Gas',
+            'Block Hash', 'Block Number', 'From', 'timestamp', 'Gas', 'Gas Price', 'Max Fee Per Gas',
             'Max Priority Fee Per Gas', 'Hash', 'Input', 'Nonce', 'To', 'Transaction Index',
             'Value', 'Type', 'Access List', 'Chain ID', 'V', 'R', 'S'
         ])
