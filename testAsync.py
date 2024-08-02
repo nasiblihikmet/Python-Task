@@ -11,8 +11,6 @@ from web3.exceptions import BlockNotFound
 import json
 
 
-
-
 provider_url = "https://lb.drpc.org/ogrpc?network=scroll&dkey=AkCtMlosOku5jbAYIluLoZIpI_vJSaoR77NivmJKmvm9"
 web3 = Web3(HTTPProvider(provider_url))
 
@@ -32,6 +30,7 @@ async def find_transactions(web3, contract_address, start_block, end_block):
     contract_address = Web3.to_checksum_address(contract_address)
     transactions = []
 
+
     async def check_block(block_number):
         try:
             print(f"Checking block {block_number}")
@@ -40,6 +39,10 @@ async def find_transactions(web3, contract_address, start_block, end_block):
                 if tx['from'] == contract_address or tx['to'] == contract_address:
                     tx= dict(tx)
                     tx['timestamp'] = block['timestamp']
+                    receipt = web3.eth.get_transaction_receipt(tx['hash'])
+                    tx['status'] = receipt['status']
+                    # tx['method'] = decode_method(tx['input'])
+                    tx['method'] = '""'
                     transactions.append(tx)
         except BlockNotFound:
             print(f"Block {block_number} not found")
@@ -48,6 +51,30 @@ async def find_transactions(web3, contract_address, start_block, end_block):
     await asyncio.gather(*tasks)
 
     return transactions
+
+def decode_method(input_data):
+     if not input_data or len(input_data) < 10:
+        return "Unknown"
+     
+     # Convert bytes to hex if needed
+     if isinstance(input_data, bytes):
+        input_data = Web3.to_hex(input_data)
+
+     method_id = input_data[:10]  # First 4 bytes (8 hex chars) for method ID
+
+     try:
+
+        # Decode the method ID using ABI
+        for item in contract.abi:
+            if item.get('type') == 'function':
+                method_signature = item['name'] + '(' + ','.join([param['type'] for param in item['inputs']]) + ')'
+                if Web3.sha3(text=method_signature)[:10] == method_id:
+                    return item['name']
+     except Exception as e:
+        print(f"Error decoding method ID: {e}")
+    
+     return "Unknown"
+
 
 
 def get_block_by_timestamp(web3, timestamp):
@@ -77,8 +104,8 @@ now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
 
 async def main():
-    start_block = 7964494
-    end_block = 7964502
+    start_block = 7916344
+    end_block = 7916393
     
     transactions_arr = []
     address= set()
@@ -118,6 +145,8 @@ async def main():
         v = transaction.get('v', 'N/A')
         r = Web3.to_hex(transaction.get('r', b''))
         s = Web3.to_hex(transaction.get('s', b''))
+        status = transaction.get('status', 'N/A')
+        method = transaction.get('method', 'N/A')  
 
         transactions_arr.append([
             block_hash,
@@ -140,7 +169,9 @@ async def main():
             chain_id,
             v,
             r,
-            s
+            s,
+            status,
+            method
         ])
         
         buyers_24h.add(transaction['to'])
@@ -162,34 +193,12 @@ async def main():
         writer.writerow(['Addresses that sold SKY in the last 24 hours'])
         writer.writerow(list(sellers_24h))
         writer.writerow([
-            'Block Hash', 'Block Number',  'timestamp', 'DateTime (UTC)', 'From', 'To', 'Gas', 'Gas Price', 'Max Fee Per Gas',
+            'Block Hash', 'Block Number',  'timestamp', 'DateTime (UTC)', 'From', 'To', 'Value', 'Gas', 'Gas Price', 'Max Fee Per Gas',
             'Max Priority Fee Per Gas', 'Hash', 'Input', 'Nonce', 'Transaction Index',
-            'Value', 'Type', 'Access List', 'Chain ID', 'V', 'R', 'S'
+             'Type', 'Access List', 'Chain ID', 'V', 'R', 'S', 'Status', 'Method'
         ])
         
         for tx in transactions_arr:
             writer.writerow(tx)
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-        # writer.writerow(['Transactions (from, to, value, hash)'])
-        # for tx in transaction_set:
-        #     writer.writerow(tx)
-
-        # writer.writerow(['Block Hash', 'Block Number', 'From', 'Gas', 'Gas Price', 'Max Fee Per Gas',
-        #     'Max Priority Fee Per Gas', 'Hash', 'Input', 'Nonce', 'To', 'Transaction Index',
-        #     'Value', 'Type', 'Access List', 'Chain ID', 'V', 'R', 'S'])
-        # for transaction_tuple in transaction_set:
-        #  writer.writerow(list(transaction_tuple))
-
-
-    # # Save data to CSV
-# with open('skydrome_trading_data.csv', mode='w') as file:
-#     writer = csv.writer(file)
-#     # writer.writerow(['Number of addresses that traded SKY in the last 24 hours', len(unique_address_count)])
-#     # writer.writerow(['Total SKY Trading Volume in 24 hours in USD', total_trading_volume_usd])
-#     # writer.writerow(['Total SKY Trading Volume in 30 days in USD', total_trading_volume_usd_30d])
-#     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(buyers_24h))
-#     writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(sellers_24h))
-
