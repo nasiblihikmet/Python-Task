@@ -52,23 +52,6 @@ async def find_transactions(web3, contract_address, start_block, end_block):
 
     return transactions
 
-
-"""
-def find_transactions(contract_address, start_block, end_block):
-    # Ensure the address is in checksum format
-    transactions = []
-    for block_number in range(start_block, end_block + 1):
-    
-        print(f"Checking block {block_number}")
-        block = web3.eth.get_block(block_number, full_transactions=True)
-
-        for tx in block.transactions:
-            if tx['from'] == contract_address or tx['to'] == contract_address:
-                transactions.append(tx)
-
-    return transactions
-
-"""
 # Function to get events from the contract
 def get_events(event_name, from_block, to_block):
     event_filter = contract.events.Transfer.createFilter(fromBlock=from_block, toBlock=to_block)
