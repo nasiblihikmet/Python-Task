@@ -9,6 +9,7 @@ import requests
 from decimal import Decimal
 import asyncio
 
+# write here url
 provider_url = ""
 web3 = Web3(HTTPProvider(provider_url))
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
