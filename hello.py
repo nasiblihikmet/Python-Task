@@ -57,9 +57,6 @@ def get_events(event_name, from_block, to_block):
     event_filter = contract.events.Transfer.createFilter(fromBlock=from_block, toBlock=to_block)
     return event_filter.get_all_entries()
 
-
-
-
 # Calculate the timestamp for 24 hours ago and 30 days ago
 now = datetime.datetime.now()
 yesterday = now - datetime.timedelta(days=1)
@@ -82,8 +79,7 @@ def get_block_by_timestamp(web3, timestamp):
         
     return web3.eth.get_block(earliest_block)
 
-             
-
+            
 # Convert timestamps to block numbers
 def get_block_number(timestamp):
     # return web3.eth.get_block(timestamp)['number']
