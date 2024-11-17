@@ -162,33 +162,3 @@ print(list(sellers_24h))
 
 
 
-# # Save data to CSV
-# with open('skydrome_trading_data.csv', mode='w') as file:
-#     writer = csv.writer(file)
-#     writer.writerow(['Number of addresses that traded SKY in the last 24 hours', len(unique_address_count)])
-#     writer.writerow(['Total SKY Trading Volume in 24 hours in USD', total_trading_volume_usd])
-#     writer.writerow(['Total SKY Trading Volume in 30 days in USD', total_trading_volume_usd_30d])
-#     writer.writerow(['Addresses that bought SKY in the last 24 hours'] + list(buyers_24h))
-#     writer.writerow(['Addresses that sold SKY in the last 24 hours'] + list(sellers_24h))
-
-
-
-    # Initialize data storage
-# addresses_traded_24h = set()
-# addresses_bought_24h = set()
-# addresses_sold_24h = set()
-# volume_24h_usd = 0
-# volume_30d_usd = 0
-
-# # Process trades from the last 24 hours
-# for trade in trades_last_24_hours:
-#     addresses_traded_24h.add(trade['args']['trader'])
-#     if trade['args']['type'] == 'buy':
-#         addresses_bought_24h.add(trade['args']['trader'])
-#     elif trade['args']['type'] == 'sell':
-#         addresses_sold_24h.add(trade['args']['trader'])
-#     volume_24h_usd += trade['args']['volumeUSD']
-
-# # Process trades from the last 30 days
-# for trade in trades_last_30_days:
-#     volume_30d_usd += trade['args']['volumeUSD']
